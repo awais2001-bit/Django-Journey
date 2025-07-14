@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>LEARNING DJANGO TEMPLATE LANGUAGE</h1>
+    {%if nm%}
+    <h3>I am {{ name }}</h3>
+    <h3>My age is {{ age }}</h3>
+    <h3>My hobbies are: {{hobbies}}</h3>
+    <h2>Filter Example</h2>
+    <h3>My name in uppercase: {{ name|upper }}</h3>
+    <h3>You are watching this page at: {{time}}</h3>
+    <h3>Float Example: {{ float_value|floatformat:2 }}</h3>
+    {%else%}
+    <h3>Variable 'nm' is not set to True</h3>
+    {%endif%}
+    <h2>For Loop Example</h2>
+    <ul>
+      {% for hobby in hobbies %}
+      <li>{{ hobby }}</li>
+      {% empty %}
+      <li>No items found.</li>
+      {% endfor %}
+  </body>
+</html>
