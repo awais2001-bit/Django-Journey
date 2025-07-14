@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('myfunc/', views.func, name='func'),
     path('', views.home, name='Home'),
+    path('hello/', views.hello, kwargs={'status':'ok'},name='HelloWorld'),
 ]

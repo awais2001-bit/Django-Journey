@@ -8,3 +8,7 @@ def func(response):
 
 def home(response):
     return HttpResponse("This is the home page")
+
+def hello(response, **kwargs):
+    status = kwargs.get('status')
+    return HttpResponse("Hello, World!", {status: status}) 
