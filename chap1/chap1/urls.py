@@ -26,4 +26,5 @@ urlpatterns = [
     # path('hello/', views.hello, {'status':'ok'},name='hello'),
     path('a/', include('app2.urls')),
     path('', include('app3.urls')),
+    path('dynamic/', include('app4.urls')),
 ]
