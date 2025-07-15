@@ -6,10 +6,10 @@ from datetime import datetime
 
 #varibles example
 
-def dynamic_view(request):
-    #business logic here
-    profile = {'name':'awais'}
-    return render(request, 'app4/index.html', context= profile)
+# def dynamic_view(request):
+#     #business logic here
+#     profile = {'name':'awais'}
+#     return render(request, 'app4/index.html', context= profile)
 
 
 
@@ -22,5 +22,6 @@ def template_language(request):
         'float_value': 3.14159,
         'nm':False,
     })
+
 
 
