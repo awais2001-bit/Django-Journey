@@ -26,9 +26,6 @@
       <li>No items found.</li>
       {% endfor %}
     </ul>
-    <ul>
-      <li><a href="{% url 'template_language_index' %}">Index Page</a></li>
-      <li><a href="{% url 'template_language' %}">Template Page</a></li>
-    </ul>
+    {% include 'app4/navbar.html' %}
   </body>
 </html>
