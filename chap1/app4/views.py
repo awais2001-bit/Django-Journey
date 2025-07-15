@@ -23,5 +23,15 @@ def template_language(request):
         'nm':False,
     })
 
+def template_language_index(request):
+    return render(request, 'app4/index.html', context={
+        'name': 'Awais',
+        'age': 30,
+        'hobbies': ['coding', 'reading', 'gaming'],
+        'time': datetime.now(),
+        'float_value': 3.14159,
+        'nm':False,
+    })
+
 
 
