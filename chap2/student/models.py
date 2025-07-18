@@ -8,3 +8,7 @@ class Profile(models.Model):
     age = models.IntegerField()
     city = models.CharField(max_length=100)
     comments = models.TextField(blank=True, null=True, default='Nothing')
+     
+    # def __str__(self): #method to view name in profile section on admin panel
+    #     return self.name
+    

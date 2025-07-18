@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>ALL STUDENT DATA</h1>
+    {%if students%}
+    <h2>Student List:</h2>
+    <ul>
+      {%for student in students%}
+      <li>
+        {{student.name}} is {{student.age}} years old and lives in
+        {{student.city}} comments by teacher are {{student.comments}}.
+      </li>
+      {%endfor%}
+    </ul>
+    {%else%}
+    <h3>No Students Found</h3>
+    {%endif%}
+  </body>
+</html>
