@@ -19,7 +19,7 @@ def registration_form(req):
         form = Registrations(req.POST)
         if form.is_valid():
             print(form.cleaned_data) # Print the cleaned data to the console
-            return HttpResponseRedirect(reverse('reg_suceess'))  # Redirect to success page after form submission
+            return HttpResponseRedirect(reverse('success'))  # Redirect to success page after form submission
     else:
         form = Registrations()  # Create an instance of the Registrations form
     #form = Registrations(field_order=['first_name', 'last_name', 'email'])  # Specify the order of fields if needed    
