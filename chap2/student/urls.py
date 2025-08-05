@@ -6,3 +6,4 @@ urlpatterns = [
     path('single_data/', single_data, name='single_data'),   
     path('registration/', registration_form, name='registration_form'),
 ]
+

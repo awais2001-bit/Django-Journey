@@ -12,3 +12,6 @@ class Profile(models.Model):
     # def __str__(self): #method to view name in profile section on admin panel
     #     return self.name
     
+class Result(models.Model):
+    marks = models.IntegerField()
+    subject = models.CharField(max_length=70)
