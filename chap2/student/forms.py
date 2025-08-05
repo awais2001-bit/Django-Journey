@@ -44,9 +44,10 @@ class DemoRegistrations(forms.Form):
 
 class Registrations(forms.Form):
     #first_name = form.CharField(validators = [validators.MaxLengthValidator(10)]) #this is an example of builtin validator
-    first_name = forms.CharField()
+    first_name = forms.CharField(error_messages={'required': 'First name is required.'},)
     last_name = forms.CharField()
     email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
     #email = forms.EmailField(validators=[starts_with_s]) #this is an example of custom validator
     
     

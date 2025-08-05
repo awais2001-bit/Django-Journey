@@ -15,3 +15,9 @@ class Profile(models.Model):
 class Result(models.Model):
     marks = models.IntegerField()
     subject = models.CharField(max_length=70)
+    
+class User(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    password = models.CharField(max_length=100)

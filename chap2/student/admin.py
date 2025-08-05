@@ -1,5 +1,5 @@
 from django.contrib import admin
-from student.models import Profile, Result
+from student.models import Profile, Result, User
 # Register your models here.
 
 #admin.site.register(Profile)
@@ -15,3 +15,7 @@ admin.site.register(Profile, ProfileAdmin)  # Register the Profile model with th
 @admin.register(Result)  # Register the Result model with the admin site
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('marks', 'subject')
+    
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'email')

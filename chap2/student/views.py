@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from student.models import Profile
+from student.models import Profile,User
 from student.forms import Registrations
 from django.http import HttpResponseRedirect
 from django.urls import reverse  # <-- better than hardcoding URLs
@@ -19,6 +19,10 @@ def registration_form(req):
         form = Registrations(req.POST)
         if form.is_valid():
             print(form.cleaned_data) # Print the cleaned data to the console
+            user = User(first_name = form.cleaned_data['first_name'], last_name=form.cleaned_data['last_name'], email=form.cleaned_data['email'], password=form.cleaned_data['password'])
+            user.save()
+            #user.delete() to delete data
+            
             return HttpResponseRedirect(reverse('success'))  # Redirect to success page after form submission
     else:
         form = Registrations()  # Create an instance of the Registrations form
