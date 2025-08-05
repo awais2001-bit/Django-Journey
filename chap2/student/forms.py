@@ -41,3 +41,26 @@ class Registrations(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
+    
+    
+    #field validations one by one
+    def clean_first_name(self):
+        name_value = self.cleaned_data['first_name']
+        if len(name_value) < 3:
+            raise forms.ValidationError("First name must be at least 3 characters long.")
+        return name_value
+    
+    
+    # form validation all at once
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     first_name_value = cleaned_data.get('first_name')
+    #     last_name_value = cleaned_data.get('last_name')
+        
+    #     if first_name_value  and len(first_name_value) < 3:
+    #         self.add_error('first_name', "First name must be at least 3 characters long.")
+        
+    #     if last_name_value and len(last_name_value) < 3:
+    #         self.add_error('last_name', "Last name must be at least 3 characters long.")
+            
+    #     return cleaned_data
