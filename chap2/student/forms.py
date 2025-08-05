@@ -36,11 +36,18 @@ class DemoRegistrations(forms.Form):
     
     
     
+#custom validator
+# def starts_with_s(value):
+#     if value[0] !='a':
+#         raise forms.ValidationError("Value must start with 'a'.")
+        
 
 class Registrations(forms.Form):
+    #first_name = form.CharField(validators = [validators.MaxLengthValidator(10)]) #this is an example of builtin validator
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
+    #email = forms.EmailField(validators=[starts_with_s]) #this is an example of custom validator
     
     
     #field validations one by one
@@ -64,3 +71,4 @@ class Registrations(forms.Form):
     #         self.add_error('last_name', "Last name must be at least 3 characters long.")
             
     #     return cleaned_data
+    

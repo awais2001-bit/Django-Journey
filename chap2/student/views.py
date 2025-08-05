@@ -27,7 +27,3 @@ def registration_form(req):
  
 def reg_suceess(req):
     return render(req, 'student/success.html')  # Render a success page after form submission
-
- 
- 
-
