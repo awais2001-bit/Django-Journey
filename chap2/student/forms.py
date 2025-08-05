@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import MinLengthValidator
 
-class Registrations(forms.Form):
+class DemoRegistrations(forms.Form):
     first_name = forms.CharField(initial='Enter your full name', help_text='your first name here',
                                  max_length=70, validators=[MinLengthValidator(3)] #validates that input has atleat 3 characters
                                  ) #_ changes in space later
@@ -31,3 +31,13 @@ class Registrations(forms.Form):
     
     dob = forms.DateField(widget = forms.DateInput(attrs={'type': 'date', 'placeholder': 'YYYY-MM-DD'})
     )  # This field allows users to select a date using a date picker.
+    
+    
+    
+    
+    
+
+class Registrations(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    email = forms.EmailField()

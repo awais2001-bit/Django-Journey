@@ -1,0 +1,32 @@
+CSRF stands for Cross-Site Request Forgery, and it’s a security feature in
+Django (and other web frameworks) that protects your website from malicious
+requests made by other websites on behalf of your logged-in users. 🚨 Problem
+ItSolves: Unauthorized Actions Imagine this: You're logged into your bank
+website. You visit a malicious site in another tab that secretly sends a POST
+request to your bank's /transfer-money/ URL. Since your browser is logged in to
+the bank, the request succeeds — and your money is stolen. ❗ This is a
+Cross-Site Request Forgery attack. ✅ How CSRF Protection Works in Django Django
+prevents this using a CSRF token — a unique, random value added to every form
+that does a POST request. ✅ On the client side (HTML form): In your templates:
+<form method="POST">{% csrf_token %} ...</form>
+Django adds a hidden input:
+<input type="hidden" name="csrfmiddlewaretoken" value="abc123..." />
+✅ On the server side: Django checks: Does the incoming request have the valid
+token? Is it the same one issued for the current session? If not, it blocks the
+request with a 403 Forbidden error. 🛡️ Why It’s Important CSRF protection
+ensures that only requests from your own forms/pages can be submitted — not
+random requests from other websites. 🛠️ Notes for You as a Developer Always use
+{% csrf_token %} in any form that uses POST, PUT, or DELETE. For APIs (e.g.,
+Django REST Framework), CSRF is handled differently — often disabled for
+token-based authentication (like JWT), but kept for session-auth. 🔍 Example
+Without CSRF Token (Bad)
+<form method="POST" action="/delete/123/">
+  <button>Delete</button>
+</form>
+🟥 Django will reject this with a CSRF error. ✅ Example With CSRF Token (Good)
+<form method="POST" action="/delete/123/">
+  {% csrf_token %}
+  <button>Delete</button>
+</form>
+✅ Secure and accepted by Django. Let me know if you want to see a real CSRF
+attack example and how Django blocks it.

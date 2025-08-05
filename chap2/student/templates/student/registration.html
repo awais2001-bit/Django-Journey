@@ -5,8 +5,10 @@
   </head>
   <body>
     <h1>Student Registration</h1>
-    <form action="'">
-      {{form}}
+    <form action=" " ,method="post">
+      <!--Learn about CSRF from file-->
+      {% csrf_token %} {{form}}
+      <!--without csrf put will not work, will give error csrf failed -->
       <button type="submit">Register</button>
     </form>
     <!-- Form label and Input by label and input -->
