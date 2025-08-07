@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from student.models import Profile,User
-from student.forms import Registrations
+from student.forms import Registrations,DemoRegistrations
 from django.http import HttpResponseRedirect
 from django.urls import reverse  # <-- better than hardcoding URLs
 
@@ -31,3 +31,8 @@ def registration_form(req):
  
 def reg_suceess(req):
     return render(req, 'student/success.html')  # Render a success page after form submission
+
+def model_registration_form(req):
+    form = DemoRegistrations()
+    return render(req, 'student/registration.html', {'form': form})
+

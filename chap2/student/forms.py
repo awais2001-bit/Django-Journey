@@ -1,5 +1,6 @@
 from django import forms
 from django.core.validators import MinLengthValidator
+from student.models import User
 
 class DemoRegistrations(forms.Form):
     first_name = forms.CharField(initial='Enter your full name', help_text='your first name here',
@@ -72,4 +73,17 @@ class Registrations(forms.Form):
     #         self.add_error('last_name', "Last name must be at least 3 characters long.")
             
     #     return cleaned_data
+     
+     
+    class ModelRegistartion(forms.ModelForm):
+        confirm_password = forms.CharField(widget=forms.PasswordInput, label='Confirm Password')
+        #if you want to add a field that is not in the model, you can do it like this.
+        class Meta:
+            model = User
+            fields = ['first_name', 'last_name', 'email', 'password']
+            #field type is defined in the model, so no need to define it here again.
+            labels = {'first_name':'enter your first name', 'last_name':'enter your last name'}
+            error_messages = {'email':{'required': 'Email is required.'}}
+            widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter your password'})}
+    
     
