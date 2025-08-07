@@ -21,3 +21,11 @@ def teacher_view_form(req):
     else:
         form = TeacherRegistration()
     return render(req, 'teacher/teacherreg.html', {'form': form})
+
+def home(req):
+    context = {'data': 'Welcome to School Management System'}   
+    return render(req, 'teacher/home.html', context)
+
+def profile(req,student_id):
+    student = {'id':student_id}
+    return render(req, 'teacher/profile.html',student)
