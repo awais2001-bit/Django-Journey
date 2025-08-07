@@ -8,5 +8,8 @@
   <body>
     <h1>Student Profile Page</h1>
     <h2>Welcome, Student {{id}}</h2>
+    {%if messages%}
+    {%for message in messages%} <br>{{message}} </br>{%endfor%}
+    {%endif%}
   </body>
 </html>
