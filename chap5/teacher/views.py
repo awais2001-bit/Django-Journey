@@ -37,3 +37,25 @@ def profile(req,student_id):
     messages.debug(req, 'This is a debug message.') #debug messages are not shown by default in production, you hqave to set the value first and its level is 10 above 10 you can use by default
     student = {'id':student_id}
     return render(req, 'teacher/profile.html',student)
+
+
+
+def set_cookie(req):
+    response = render(req,'teacher/setcookie.html')
+    response.set_cookie('token', 'y11111')
+    return response
+
+def get_cookie(req):
+    token = req.COOKIES.get('token', 'No cookie found') # if cookie not found then it will return this value
+    response = render(req,'teacher/getcookie.html')
+    return response
+    
+def del_cookie(req):
+    response = render(req,'teacher/delcookie.html')
+    token = req.COOKIES.delete_cookie('token')  # delete the cookie
+    return response
+
+#we use signedcookie to make sure that the cookie is not tampered with, we use parameter salt fo that
+#req.COOKIES.get_signed_cookie('token', 'No cookie found', salt='my_salt_value') # if cookie not found then it will return this value
+
+
