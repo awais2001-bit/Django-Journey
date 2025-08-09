@@ -1,5 +1,5 @@
 from django.urls import path
-from teacher.views import student_view_form,teacher_view_form, home,profile,set_cookie, get_cookie, del_cookie
+from teacher.views import student_view_form,teacher_view_form, home,profile,set_cookie, get_cookie, del_cookie,set_session,get_session,del_session
 
 
 urlpatterns = [
@@ -11,6 +11,9 @@ urlpatterns = [
     path('set_cookie/', set_cookie, name='set_cookie'),
     path('get_cookie/', get_cookie, name='get_cookie'),
     path('del_cookie/', del_cookie, name='del_cookie'),
+    path('set_session/', set_session, name='set_session'),
+    path('get_session/', get_session, name='get_session'),
+    path('del_session/', del_session, name='del_session'), 
 ]                                                              
 
 
