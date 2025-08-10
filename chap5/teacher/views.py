@@ -76,3 +76,26 @@ def flush_session(req):
     req.session.flush()  # Clear all session data
     #return render(req, 'teacher/flushsession.html')
 
+#to create file based session, we need to change session engine in settings.py, and session file path
+# SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+# SESSION_FILE_PATH = '/path/to/your/session/files'  # Specify the path where session files will be stored
+
+
+# cache means Temporary storage mechanism for frequently accessed data to improve performance.
+#three types of cache includes per-site cahce, per-view cache, template fragment cache
+
+
+
+#before cahche middleware, we need to add cache settings in settings.py
+#'django.middleware.cache.UpdateCacheMiddleware',  # Middleware for caching
+#'django.middleware.common.CommonMiddleware', This middleware order is important
+#'django.middleware.cache.FetchFromCacheMiddleware',  # Middleware for caching
+
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache', # Use file-based cache for database change it with django.core.cache.backends.db.DatabaseCache
+#     'LOCATION': '/var/tmp/django_cache',  # Specify the path where cache files will be stored
+#}
+#}
+ #command to create cache table is python manage.py createcachetable
+ 

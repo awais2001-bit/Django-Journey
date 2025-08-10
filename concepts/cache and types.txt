@@ -1,0 +1,83 @@
+In Django (and web development in general), **cache** refers to temporarily storing data so that future requests can be served faster without recomputing or re-fetching it from the database or an external service.
+
+---
+
+## **What is Cache?**
+
+* **Purpose:** Improve performance and reduce server load.
+* **How it works:** When a page or query is requested for the first time, the server stores its result in the cache. Next time, the stored result is returned directly from memory (or other fast storage) instead of regenerating it.
+* **Where stored:** Memory (RAM), files, databases, or external services like Redis or Memcached.
+
+---
+
+## **Types of Cache in Django**
+
+Django supports multiple cache backends:
+
+| **Type**                          | **Description**                                                                                     | **Best Use Case**                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **In-Memory Cache (LocMemCache)** | Stores data in Django's process memory. Very fast but only available to the process that stored it. | Small projects, development, single-server setups.                            |
+| **File-Based Cache**              | Stores cache data in files on the disk.                                                             | When you want persistence but have no Redis/Memcached setup.                  |
+| **Database Cache**                | Stores cache data in a database table (`django_cache`).                                             | When you don't want to install extra software and already have a reliable DB. |
+| **Memcached**                     | External in-memory cache server. Very fast, supports distributed caching.                           | High-performance apps, multi-server environments.                             |
+| **Redis Cache**                   | Advanced in-memory data store with extra features like pub/sub, persistence.                        | Large-scale apps, real-time features, analytics.                              |
+| **Dummy Cache**                   | Does nothing (like no-cache).                                                                       | Development/testing where caching is not needed.                              |
+
+---
+
+## **Types of Caching Techniques**
+
+Aside from backends, caching in Django can be applied at different levels:
+
+1. **Per-View Cache**
+
+   * Caches the entire response of a view.
+   * Example:
+
+     ```python
+     from django.views.decorators.cache import cache_page
+
+     @cache_page(60 * 15)  # Cache for 15 minutes
+     def my_view(request):
+         ...
+     ```
+
+2. **Template Fragment Cache**
+
+   * Caches part of a template instead of the whole page.
+   * Example:
+
+     ```django
+     {% load cache %}
+     {% cache 900 sidebar %}
+         ... HTML for sidebar ...
+     {% endcache %}
+     ```
+
+3. **Low-Level Cache API**
+
+   * Lets you cache arbitrary Python data.
+   * Example:
+
+     ```python
+     from django.core.cache import cache
+
+     cache.set('my_key', 'my_value', 60)  # Store for 60 sec
+     value = cache.get('my_key')
+     ```
+
+4. **Database Query Caching**
+
+   * Use caching to store expensive query results.
+
+---
+
+✅ **In short:**
+
+* **Cache speeds things up.**
+* **Choose the backend** depending on your scale (LocMem for small projects, Redis/Memcached for big ones).
+* **Choose the caching method** depending on whether you want to cache full pages, fragments, or data.
+
+---
+
+If you want, I can make you a **table comparing cache, cookies, and sessions** so you see all three side-by-side. That way, the differences will be crystal clear.
