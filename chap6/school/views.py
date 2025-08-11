@@ -3,6 +3,7 @@ from school.models import Student, Teacher
 from django.db.models import Q
 from django.views import View
 from django.views.generic.list import ListView
+from django.views.generic.edit import CreateView,DeleteView
 # Create your views here.
 
 def home(req):
@@ -40,3 +41,17 @@ def student_data_field_lookup(req):
     return render(req, 'school/student_data.html', {'students': all_data})
 
     #all_data = Student.objects.filter(Q(name__exact='Hamza') | Q(marks__gt=1000)) # this will show the data which has name exact 'Hamza' or marks greater than 1000
+    
+    
+    
+#create view is used to create a new object in the database using a form, it automatically handles the form submission and validation
+class StudentCreateView(CreateView):
+    model = Student
+    fields = ['name', 'roll', 'city', 'marks']
+    template_name = 'school/student_form.html'
+    success_url = '/school/thanks/'  # URL to redirect after successful form submission
+
+class StudentDeleteView(DeleteView):
+    model = Student
+    template_name = 'school/student_confirm_delete.html'
+    success_url = '/school/thanks/'  # URL to redirect after successful deletion
