@@ -48,6 +48,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'school.middlewares.my_middleware',  # Custom middleware
+    'school.middlewares.MyMiddleware1',  # Custom middleware
+    'school.middlewares.MyMiddleware2',  # Custom middleware
+    'school.middlewares.MyMiddleware3',  # Custom middleware
 ]
 
 ROOT_URLCONF = 'chap6.urls'
