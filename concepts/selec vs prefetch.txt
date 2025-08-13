@@ -1,0 +1,92 @@
+In **Django 5**, `select_related` and `prefetch_related` are **ORM optimization methods** that help reduce the **N+1 query problem** when fetching related objects from the database.
+
+Let’s break them down with examples.
+
+---
+
+## **1. `select_related`**
+
+* **When to use:** For **foreign key** and **one-to-one** relationships.
+* **How it works:** Uses SQL `JOIN` to fetch related data in the **same query**.
+* **Benefit:** Saves extra queries by fetching related objects in one go.
+* **Limitation:** Works only for single-valued relationships (FK, OneToOne), not many-to-many.
+
+### **Example**
+
+```python
+# Models
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+# Without select_related
+books = Book.objects.all()
+for book in books:
+    print(book.author.name)  
+# ❌ This causes 1 query for books + N queries for authors (N+1 problem)
+
+# With select_related
+books = Book.objects.select_related('author')
+for book in books:
+    print(book.author.name)
+# ✅ Only 1 SQL query for books and authors together
+```
+
+---
+
+## **2. `prefetch_related`**
+
+* **When to use:** For **many-to-many** and **reverse foreign key** relationships.
+* **How it works:** Executes **two separate queries** but joins results in Python memory.
+* **Benefit:** Avoids multiple queries for related sets.
+* **Limitation:** More memory usage than `select_related`.
+
+### **Example**
+
+```python
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+
+class Course(models.Model):
+    title = models.CharField(max_length=100)
+    students = models.ManyToManyField(Student)
+
+# Without prefetch_related
+courses = Course.objects.all()
+for course in courses:
+    print(course.students.all())  
+# ❌ 1 query for courses + N queries for students
+
+# With prefetch_related
+courses = Course.objects.prefetch_related('students')
+for course in courses:
+    print(course.students.all())
+# ✅ 1 query for courses + 1 query for students (no N+1)
+```
+
+---
+
+## **3. When to Use Which**
+
+| Method             | Works With             | Query Count | Use Case                                          |
+| ------------------ | ---------------------- | ----------- | ------------------------------------------------- |
+| `select_related`   | FK, OneToOne           | 1           | You want related single-object data in same query |
+| `prefetch_related` | ManyToMany, reverse FK | 2           | You want related multiple-object data efficiently |
+
+---
+
+## **4. Can You Combine Them?**
+
+Yes! Often in large queries:
+
+```python
+books = Book.objects.select_related('author').prefetch_related('reviews')
+```
+
+* **`select_related('author')`** → joins author in the same query
+* **`prefetch_related('reviews')`** → fetches reviews in a separate query efficiently
+
+---

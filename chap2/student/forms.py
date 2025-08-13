@@ -11,7 +11,7 @@ class DemoRegistrations(forms.Form):
     
     pin_code = forms.IntegerField(min_value=100000, max_value=999999,
                                   error_messages = {'min_value':'pin code must be atleast 6 digits',
-                                    'max_value': 'pin code be atmost 6 digitd'})
+                                    'max_value': 'pin code be atmost 6 digit'})
     
     gender = forms.ChoiceField(choices=[('m','male'),('f','female'),('o','other')], widget=forms.Select())
     

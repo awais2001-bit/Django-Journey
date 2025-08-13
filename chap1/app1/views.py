@@ -11,4 +11,4 @@ def home(response):
 
 def hello(req, **kawrgs):
     status = kawrgs.get('status')
-    return HttpResponse(" Hello, World!", {status}) 
+    return HttpResponse(" Hello, World!", {status})
