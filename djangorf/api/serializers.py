@@ -48,8 +48,12 @@ class OrderSerializer(serializers.ModelSerializer):
     
 
 
-class ProductInfoSerializer(serializers.Serializer):
+class ProductInfoSerializer(serializers.Serializer): 
     #get all products, count, max price
+    #This pattern is perfect when you want to return custom combined data — e.g., model records + calculated statistics — in one API call.
+    #serializers.Serializer lets you define exactly what the JSON structure should be.
+    #The serializer handles nested serialization for the products list.
     products = ProductSerializer(many=True)
     count = serializers.IntegerField()
     max_price = serializers.FloatField() 
+    

@@ -4,6 +4,7 @@ from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSeria
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Max
+from rest_framework import generics
 # Create your views here.
 
 # A decorator from Django REST Framework (from rest_framework.decorators import api_view).
@@ -31,7 +32,7 @@ def product_detail(request, pk):
 
 @api_view(['GET'])
 def order_list(request):
-    orders = Order.objects.all()
+    orders = Order.objects.prefetch_related('items__product').all() #prefetch_related is used to optimize database queries by fetching related objects in a single query
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
 
@@ -45,3 +46,29 @@ def product_info(request):
     })
     
     return Response(serializer.data)
+
+
+#GENERIC VIEWS
+
+
+class ProductListApiView(generics.ListAPIView): #ListAPIView Get all objects
+    #queryset = Product.objects.all()
+    queryset = Product.objects.filter(stock__gt=0)  #if you want to filter products that are in stock
+    serializer_class = ProductSerializer
+    
+class ProductDetailApiView(generics.RetrieveAPIView): #RetrieveAPIView Get only one object
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk'  # Allows us to use the primary key in the URL to retrieve a specific product
+    lookup_url_kwarg = 'pk'  # This matches the URL pattern where pk is used as a variable by default it is pk but you can change it also on the basis of what you want to use in urls.py
+    
+class OrderListApiView(generics.ListAPIView):
+    queryset = Order.objects.prefetch_related('items__product').all()  # Prefetch related to optimize database queries
+    serializer_class = OrderSerializer
+    
+    
+class OrderDetailApiView(generics.RetrieveAPIView): 
+    queryset = Order.objects.prefetch_related('items__product').all()
+    serializer_class = OrderSerializer
+    lookup_field = 'order_id'  # Allows us to use the order_id in the URL to retrieve a specific order
+    lookup_url_kwarg = 'order_id'  # This matches the URL pattern where order_id is used as a variable
