@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
@@ -38,11 +39,11 @@ class Order(models.Model):
         return f"Order {self.order_id} by {self.user.username} is {self.status}"
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,related_name='items') #we use related_name to access items from order, also see serializers file
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
         
     @property
     def total_price(self):
-        return f"{self.quantity} * {self.product.price} in order {self.order.order_id}"
+        return Decimal(self.quantity) * Decimal(self.product.price)
     
