@@ -72,3 +72,15 @@ class OrderDetailApiView(generics.RetrieveAPIView):
     serializer_class = OrderSerializer
     lookup_field = 'order_id'  # Allows us to use the order_id in the URL to retrieve a specific order
     lookup_url_kwarg = 'order_id'  # This matches the URL pattern where order_id is used as a variable
+    
+    
+    
+# in this class we are using session based authentication, so we can access the user from request.user and we can see the orders of the user who is logged in
+class UserOrderListApiView(generics.ListAPIView):
+    queryset = Order.objects.prefetch_related('items__product').all()
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = super().get_queryset()
+        return qs.filter(user=user)
