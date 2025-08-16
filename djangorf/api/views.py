@@ -1,14 +1,14 @@
 from django.shortcuts import get_object_or_404
 from api.models import Product, Order
 from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSerializer, CreateProductSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,action
 from rest_framework.response import Response 
 from django.db.models import Max
 from rest_framework import generics,filters, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
-from api.filters import ProductFilter, InStockFilterBackend 
+from api.filters import ProductFilter, InStockFilterBackend,OrderFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -214,6 +214,20 @@ class ProductLimitOffsetPagination(generics.ListAPIView):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related('items__product').all()
     serializer_class = OrderSerializer
-    permission_classes = ['AllowAny']  # Allow any user to access this viewset, you can change it to IsAuthenticated or IsAdminUser based on your requirements
+    permission_classes = [AllowAny]  # Allow any user to access this viewset, you can change it to IsAuthenticated or IsAdminUser based on your requirements
     
+    
+class OrderViewFilterSet(viewsets.ModelViewSet):
+    queryset = Order.objects.prefetch_related('items__product').all()
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny] 
+    filterset_class = OrderFilter  # Use the custom filter class defined in api/filters.py
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    
+    
+    @action(detail=False, methods=['get'], url_path='my-orders')
+    def user_orders(self,request):
+        orders = self.get_queryset().filter(user=request.user)
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data)
     

@@ -22,5 +22,6 @@ urlpatterns = [
 
 
 router = DefaultRouter()
-router.register('orders',views.OrderViewSet)
+router.register('orders',views.OrderViewSet, basename='orders')  #we use basename to specify the base name for the viewset, so in this way we can use same model class for different views
+router.register('filterorders',views.OrderViewFilterSet,basename='filterorders')
 urlpatterns += router.urls
