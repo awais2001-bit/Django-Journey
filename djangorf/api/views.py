@@ -4,10 +4,12 @@ from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSeria
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Max
-from rest_framework import generics
+from rest_framework import generics,filters
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.views import APIView
 from api.filters import ProductFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
 # Create your views here.
 
 # A decorator from Django REST Framework (from rest_framework.decorators import api_view).
@@ -152,5 +154,22 @@ class ProductFilterView(generics.ListAPIView):
     #one problem with this is that it is case sensitive
     
     
-    filterset_class = ProductFilter  #we can use the custom filter class defined in api/filters.py, this custom filter also gives us the option to filter by substring too, see the file
+    #filterset_class = ProductFilter  #we can use the custom filter class defined in api/filters.py, this custom filter also gives us the option to filter by substring too, see the file
     
+    
+
+class ProductSearchFilterView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_class = ProductFilter  # Use the custom filter class defined in api/filters.py
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]  # Enables filtering and searching
+    search_fields = ['name', 'description']  # Allows searching by name and description in the API
+    
+    
+class ProductOrderFilterView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_class = ProductFilter  # Use the custom filter class defined in api/filters.py
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]  # Enables filtering and searching
+    search_fields = ['name', 'description']  # Allows searching by name and description in the API
+    ordering_fields = ['price', 'stock']  # Allows ordering by price and stock in the API
