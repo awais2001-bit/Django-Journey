@@ -1,6 +1,7 @@
 from decimal import Decimal
 from rest_framework import serializers
 from .models import Product,Order, OrderItem
+from django.db import transaction
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -80,12 +81,31 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             fields = ('product', 'quantity')
     items = OrderItemCreateSerializer(many=True)
     
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items')
+        instance = super().update(instance, validated_data) # Update the order instance with the validated data
+        
+        
+        if items_data is not None:
+            # Clear existing items, optional depends on requirements
+            instance.items.all().delete()
+            # Create new items
+            for item_data in items_data:
+                OrderItem.objects.create(order=instance, **item_data)
+    
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
-        for item_data in items_data:
-            OrderItem.objects.create(order=order, **item_data)
-        return order
+        
+        
+        #It’s a context manager from django.db.transaction.
+        # It tells Django:
+        # “Everything inside this block should succeed as a single database transaction.
+        # If any part fails (raises an exception), roll back everything.”
+        with transaction.atomic(): 
+            order = Order.objects.create(**validated_data)
+            for item_data in items_data:
+                OrderItem.objects.create(order=order, **item_data)
+            return order
     
     class Meta:
         model = Order

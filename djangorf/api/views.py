@@ -255,12 +255,12 @@ class OrderCreateSet(viewsets.ModelViewSet):
     filterset_class = OrderFilter  # Use the custom filter class defined in api/filters.py
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     
-    def perform_create(self, serializer):
+    def perform_create(self, serializer): #this will automatically get the user, which is self.request.user, and save it to the order
         serializer.save(user=self.request.user)
     
     
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == 'create' or self.action == 'update':
             return OrderCreateSerializer
         return super().get_serializer_class()
     
