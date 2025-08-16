@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'silk',
+    'drf_spectacular',  # For API documentation
 ]
 
 MIDDLEWARE = [
@@ -136,4 +137,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # or AllowAny if you want open access
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # For API documentation
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'E-commerece API',
+    'DESCRIPTION': 'A simple e-commerce API for managing products and orders.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
 }
