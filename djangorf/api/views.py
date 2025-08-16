@@ -1,14 +1,16 @@
-from django.shortcuts import get_object_or_404, render
-from api.models import Product, Order, OrderItem
+from django.shortcuts import get_object_or_404
+from api.models import Product, Order
 from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSerializer, CreateProductSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Max
 from rest_framework import generics,filters
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
 from api.filters import ProductFilter, InStockFilterBackend 
 from django_filters.rest_framework import DjangoFilterBackend
+
 
 # Create your views here.
 
@@ -181,3 +183,29 @@ class ProductCustomFilterView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,InStockFilterBackend]  
     search_fields = ['name', 'description']  
     ordering_fields = ['price', 'stock']  
+    
+    
+class ProductPagePagination(generics.ListAPIView):
+    queryset = Product.objects.order_by('pk')  # Order by primary key to ensure consistent pagination
+    serializer_class = ProductSerializer
+    filterset_class = ProductFilter  
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,InStockFilterBackend]  
+    search_fields = ['name', 'description']  
+    ordering_fields = ['price', 'stock']  
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 2  # Set the page size for pagination  
+    pagination_class.page_size_query_param = 'page_size'  # Allows clients to set the page size via a query parameter   
+    pagination_class.page_size_query_param = 'size' # Allows clients to set the page size via a query parameter
+    pagination_class.max_page_size = 10  # Set a maximum page size to prevent abuse  
+    
+    
+class ProductLimitOffsetPagination(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_class = ProductFilter  
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,InStockFilterBackend]  
+    search_fields = ['name', 'description']  
+    ordering_fields = ['price', 'stock']  
+    pagination_class = LimitOffsetPagination
+     
+    

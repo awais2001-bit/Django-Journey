@@ -139,7 +139,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',  # or AllowAny if you want open access
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # For API documentation
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'] # For filtering support
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],  # For filtering support
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5
+    
+
 
 }
 
