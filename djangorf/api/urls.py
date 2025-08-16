@@ -1,5 +1,6 @@
 from django.urls import path
 from api import views
+from rest_framework.routers import DefaultRouter
 
 
 urlpatterns = [
@@ -18,3 +19,8 @@ urlpatterns = [
     path('products/page_pagination/', views.ProductPagePagination.as_view(), name='product_custom_filter_api'),
     
 ]
+
+
+router = DefaultRouter()
+router.register('orders',views.OrderViewSet)
+urlpatterns += router.urls

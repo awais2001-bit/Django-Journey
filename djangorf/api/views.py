@@ -2,9 +2,9 @@ from django.shortcuts import get_object_or_404
 from api.models import Product, Order
 from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSerializer, CreateProductSerializer
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework.response import Response 
 from django.db.models import Max
-from rest_framework import generics,filters
+from rest_framework import generics,filters, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
@@ -208,4 +208,12 @@ class ProductLimitOffsetPagination(generics.ListAPIView):
     ordering_fields = ['price', 'stock']  
     pagination_class = LimitOffsetPagination
      
+    
+#viewset
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.prefetch_related('items__product').all()
+    serializer_class = OrderSerializer
+    permission_classes = ['AllowAny']  # Allow any user to access this viewset, you can change it to IsAuthenticated or IsAdminUser based on your requirements
+    
     
