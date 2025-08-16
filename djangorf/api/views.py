@@ -7,6 +7,7 @@ from django.db.models import Max
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.views import APIView
+from api.filters import ProductFilter
 # Create your views here.
 
 # A decorator from Django REST Framework (from rest_framework.decorators import api_view).
@@ -122,7 +123,6 @@ class ProductCreateApiView(generics.CreateAPIView):
 class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = CreateProductSerializer
-    
     def get_permissions(self):
         self.permission_classes = [AllowAny]
         if self.request.method == 'POST':
@@ -142,3 +142,15 @@ class ProductAllView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             self.permission_classes = [IsAdminUser]
         return super().get_permissions()
+    
+
+class ProductFilterView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_fields = ['name', 'price']  # Allows filtering by name and price in the API, this is used # to filter the products in the API, you can use this in the URL like this: /products/listcreate?name=product_name
+    #we can use this filter instead of using get_queryset method, this is used to filter the products in the API,
+    #one problem with this is that it is case sensitive
+    
+    
+    filterset_class = ProductFilter  #we can use the custom filter class defined in api/filters.py, this custom filter also gives us the option to filter by substring too, see the file
+    
