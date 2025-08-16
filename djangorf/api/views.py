@@ -7,7 +7,7 @@ from django.db.models import Max
 from rest_framework import generics,filters
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.views import APIView
-from api.filters import ProductFilter
+from api.filters import ProductFilter, InStockFilterBackend 
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -173,3 +173,11 @@ class ProductOrderFilterView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]  # Enables filtering and searching
     search_fields = ['name', 'description']  # Allows searching by name and description in the API
     ordering_fields = ['price', 'stock']  # Allows ordering by price and stock in the API
+    
+class ProductCustomFilterView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_class = ProductFilter  
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,InStockFilterBackend]  
+    search_fields = ['name', 'description']  
+    ordering_fields = ['price', 'stock']  
