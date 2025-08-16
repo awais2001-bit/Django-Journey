@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Max
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 from rest_framework.views import APIView
 # Create your views here.
 
@@ -122,3 +122,23 @@ class ProductCreateApiView(generics.CreateAPIView):
 class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = CreateProductSerializer
+    
+    def get_permissions(self):
+        self.permission_classes = [AllowAny]
+        if self.request.method == 'POST':
+            self.permission_classes = [IsAdminUser]
+            
+        return super().get_permissions()
+    
+
+
+class ProductAllView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_url_kwarg = 'product_id'  # This matches the URL pattern where pk is used as a variable by default it is pk but you can change it also on the basis of what you want to use in urls.py
+    
+    def get_permissions(self):
+        self.permission_classes = [AllowAny]
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            self.permission_classes = [IsAdminUser]
+        return super().get_permissions()
