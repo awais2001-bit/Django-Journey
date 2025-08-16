@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from api.models import Product, Order, OrderItem
-from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSerializer
+from api.serializers import ProductSerializer, OrderSerializer, ProductInfoSerializer, CreateProductSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Max
@@ -113,3 +113,12 @@ class ProductInfoApiView(APIView):
             'max_price': products.aggregate(max_price=Max('price'))['max_price']
         })
         return Response(serializer.data)
+    
+class ProductCreateApiView(generics.CreateAPIView):
+    model = Product
+    serializer_class = CreateProductSerializer
+    
+    
+class ProductListCreateApiView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = CreateProductSerializer
