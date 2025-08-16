@@ -231,3 +231,17 @@ class OrderViewFilterSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(orders, many=True)
         return Response(serializer.data)
     
+    
+class OrderPermissionsSet(viewsets.ModelViewSet):
+    queryset = Order.objects.prefetch_related('items__product').all()
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny] 
+    filterset_class = OrderFilter  # Use the custom filter class defined in api/filters.py
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.user.is_staff:
+            qs = qs.filter(user=self.request.user)
+        return qs
