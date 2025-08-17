@@ -141,7 +141,21 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # For API documentation
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],  # For filtering support
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 5
+    'PAGE_SIZE': 5,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        #'rest_framework.throttling.UserRateThrottle'
+        #'api.throttles.BurstRateThrottle',  # Custom burst rate throttle
+        #'api.throttles.SustainedRateThrottle',  # Custom sustained rate throttle
+        'rest_framework.throttling.ScopedRateThrottle',  # For custom throttling scopes
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        #'user': '1000/day'
+        #'burst': '10/minute',  # Custom burst rate throttle
+        #'sustained': '100/hour',  # Custom sustained rate throttle
+        'products': '10/minute',  # Custom throttle for product-related actions
+    }
     
 
 
@@ -154,3 +168,14 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://django@localhost:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "mysecret"
+        }
+    }
+} 

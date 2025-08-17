@@ -1,0 +1,150 @@
+Great question 👌 — Django **throttling** is a super important concept in **DRF (Django REST Framework)** when you’re building APIs. Let me break it down for you step by step:
+
+---
+
+# 🔹 What is Throttling?
+
+Throttling is a way to **limit the number of requests** a client (user, IP, or token) can make to your API **in a given time period**.
+
+👉 Example:
+
+* A user can only make **100 requests per hour**.
+* Or an anonymous user can make **10 requests per minute**.
+
+If the limit is exceeded → DRF returns **HTTP 429 Too Many Requests**.
+
+---
+
+# 🔹 Why Do We Use It? (Benefits)
+
+1. **Protect server resources** → Prevents your API/database from being overloaded.
+2. **Stop abuse** → Stops users or bots from spamming endpoints.
+3. **Fair usage** → Ensures all clients get equal access to resources.
+4. **Security** → Adds an extra layer of defense against brute force / DoS attacks.
+
+---
+
+# 🔹 How Throttling Works in DRF
+
+DRF has built-in throttling classes.
+You configure them in `settings.py` under `REST_FRAMEWORK`.
+
+---
+
+## 1. Enable Throttling
+
+In `settings.py`:
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',   # for unauthenticated users
+        'rest_framework.throttling.UserRateThrottle',   # for authenticated users
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',   # anonymous users → 10 requests per minute
+        'user': '1000/day',    # logged-in users → 1000 requests per day
+    }
+}
+```
+
+---
+
+## 2. Apply Throttling
+
+Now throttling will automatically apply to **all views**.
+If a user exceeds the limit → DRF returns:
+
+```json
+{
+  "detail": "Request was throttled. Expected available in 53 seconds."
+}
+```
+
+---
+
+## 3. Per-View Throttling
+
+You can also set throttling **only for specific views**:
+
+```python
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class ProductListView(APIView):
+    throttle_classes = [UserRateThrottle]   # apply only to this view
+    
+    def get(self, request):
+        return Response({"msg": "Product list"})
+```
+
+---
+
+## 4. Custom Throttle
+
+You can create your own rules by subclassing `BaseThrottle`.
+
+Example: Limit each IP to **5 requests per minute**:
+
+```python
+import time
+from rest_framework.throttling import BaseThrottle
+
+VISITORS = {}
+
+class CustomRateThrottle(BaseThrottle):
+    def allow_request(self, request, view):
+        ip = request.META.get('REMOTE_ADDR')
+        now = time.time()
+
+        if ip not in VISITORS:
+            VISITORS[ip] = []
+        
+        # keep only last 60 seconds requests
+        VISITORS[ip] = [t for t in VISITORS[ip] if now - t < 60]
+
+        if len(VISITORS[ip]) >= 5:
+            return False   # Block request
+        
+        VISITORS[ip].append(now)
+        return True
+```
+
+Attach it to a view:
+
+```python
+class LimitedView(APIView):
+    throttle_classes = [CustomRateThrottle]
+
+    def get(self, request):
+        return Response({"msg": "Hello, throttled world!"})
+```
+
+---
+
+# 🔹 Types of Throttles in DRF
+
+1. **AnonRateThrottle** → For unauthenticated users.
+2. **UserRateThrottle** → For authenticated users.
+3. **ScopedRateThrottle** → Different limits for different endpoints (example: `/login/` can have stricter throttling than `/products/`).
+
+---
+
+# 🔹 When to Use It
+
+* Protecting **login endpoints** (to prevent brute force attacks).
+* **Public APIs** where anonymous users shouldn’t spam.
+* **Heavy queries** like search or report generation.
+* Rate-limiting **mobile apps** hitting your API.
+
+---
+
+✅ **Summary**:
+Throttling = request rate limiting.
+We use it to **prevent abuse, save resources, and ensure fairness**.
+Implemented by setting **`DEFAULT_THROTTLE_CLASSES` and `DEFAULT_THROTTLE_RATES`** in DRF.
+We can customize it per-user, per-view, or even write our own logic.
+
+---
+

@@ -10,7 +10,8 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 from rest_framework.views import APIView
 from api.filters import ProductFilter, InStockFilterBackend,OrderFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # Create your views here.
 
@@ -271,3 +272,37 @@ class OrderCreateSet(viewsets.ModelViewSet):
         if not self.request.user.is_staff:
             qs = qs.filter(user=self.request.user)
         return qs
+    
+    
+    
+class ProductListCacheApiView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = CreateProductSerializer
+    
+    
+    @method_decorator(cache_page(60 * 15, key_prefix='product_list'))  # Cache the response for 15 minutes
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    
+    def get_permissions(self):
+        self.permission_classes = [AllowAny]
+        if self.request.method == 'POST':
+            self.permission_classes = [IsAdminUser]
+            
+        return super().get_permissions()    
+    
+    
+    
+    
+class ProductListThrottleApiView(generics.ListCreateAPIView):
+    throttle_scope = 'products' # Define a throttle scope for this view, this is scoped rate throttle, see in settings file
+    queryset = Product.objects.all()
+    serializer_class = CreateProductSerializer
+    def get_permissions(self):
+        self.permission_classes = [AllowAny]
+        if self.request.method == 'POST':
+            self.permission_classes = [IsAdminUser]
+            
+        return super().get_permissions()
+    
