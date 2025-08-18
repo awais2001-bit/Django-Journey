@@ -3,8 +3,9 @@ from django.shortcuts import render
 from tasks.models import Task, User
 from rest_framework.response import Response 
 from tasks.serializers import UserSerializer, TaskSerializer, CreateTaskSerializer,UpdateTaskSerializer
-from rest_framework import generics
+from rest_framework import generics,filters
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser,BasePermission
+from rest_framework.views import APIView
 # Create your views here.
 
 
@@ -42,4 +43,27 @@ class UpdateTask(generics.RetrieveUpdateAPIView):
         user = self.request.user
         qs = Task.objects.all()
         return qs.filter(assignee=user)
-     
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class DeleteTask(APIView):
+    permission_classes = [IsSuperUser]
+    
+    def get(self, request, *args, **kwargs):
+        query_set = Task.objects.filter(status="completed")
+        serializer = TaskSerializer(query_set, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        queryset = Task.objects.filter(status="completed")
+        count = queryset.count()
+        if count == 0:
+            return Response({"message": "No completed tasks found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        queryset.delete()
+        return Response({"message": f"{count} completed tasks deleted."}, status=status.HTTP_200_OK)
+
+    
