@@ -14,11 +14,12 @@ class CreatePostView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
+    
     def get_queryset(self):
         user = self.request.user
         qs = Post.objects.all()
         if user.is_superuser:
-            return qs 
+            return qs
         return qs.filter(author=user)
     
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
