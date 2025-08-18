@@ -1,12 +1,14 @@
-from http.client import HTTPResponse
 from django.shortcuts import render
 from tasks.models import Task, User
 from rest_framework.response import Response 
-from tasks.serializers import UserSerializer, TaskSerializer, CreateTaskSerializer,UpdateTaskSerializer
-from rest_framework import generics,filters
+from tasks.serializers import  TaskSerializer, CreateTaskSerializer,UpdateTaskSerializer,UpdateAssigneeTaskSerializer
+from rest_framework import generics,filters,status
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser,BasePermission
 from rest_framework.views import APIView
 # Create your views here.
+
+def home(request):
+    return render(request, "tasks/index.html")
 
 
 class IsSuperUser(BasePermission):
@@ -16,7 +18,7 @@ class IsSuperUser(BasePermission):
 
 class CreateTask(generics.CreateAPIView):
     model = Task
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsAuthenticated,IsSuperUser]
     serializer_class = CreateTaskSerializer
     
     def perform_create(self, serializer):
@@ -25,6 +27,7 @@ class CreateTask(generics.CreateAPIView):
 
 class ViewTask(generics.ListAPIView):
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
         user = self.request.user
         qs = Task.objects.all()
@@ -32,26 +35,25 @@ class ViewTask(generics.ListAPIView):
             return qs 
         return qs.filter(assignee=user)
 
-class UpdateTask(generics.RetrieveUpdateAPIView):
+class UserUpdateTask(generics.RetrieveUpdateAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'task_id'
+    permission_classes = [IsAuthenticated]
+    
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
             return UpdateTaskSerializer
         return TaskSerializer
+    
     def get_queryset(self):
         user = self.request.user
         qs = Task.objects.all()
         return qs.filter(assignee=user)
     
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-
-class DeleteTask(APIView):
-    permission_classes = [IsSuperUser]
     
+class DeleteTask(APIView):
+    
+    permission_classes = [IsAuthenticated,IsSuperUser]
     def get(self, request, *args, **kwargs):
         query_set = Task.objects.filter(status="completed")
         serializer = TaskSerializer(query_set, many=True)
@@ -65,5 +67,4 @@ class DeleteTask(APIView):
         
         queryset.delete()
         return Response({"message": f"{count} completed tasks deleted."}, status=status.HTTP_200_OK)
-
     

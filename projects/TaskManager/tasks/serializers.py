@@ -51,3 +51,8 @@ class UpdateTaskSerializer(serializers.ModelSerializer):
         fields = [
             'status'
         ]
+        
+class UpdateAssigneeTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = '__all__'
