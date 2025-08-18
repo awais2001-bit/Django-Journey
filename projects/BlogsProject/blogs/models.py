@@ -4,12 +4,12 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.s
 
 class User(AbstractUser):
-    bio = models.TextField(blank=True, null=True)
+    pass
 
 class Post(models.Model):
     
     title = models.CharField(max_length=250)
-    content = models.TextField(related_name='content')
+    content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
