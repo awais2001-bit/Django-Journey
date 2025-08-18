@@ -12,6 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source="owner.username", read_only=True)
+    assignee = serializers.CharField(source="assignee.username")
     class Meta:
         model = Task
         fields = '__all__'

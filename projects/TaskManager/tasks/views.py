@@ -5,10 +5,9 @@ from tasks.serializers import  TaskSerializer, CreateTaskSerializer,UpdateTaskSe
 from rest_framework import generics,filters,status
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser,BasePermission
 from rest_framework.views import APIView
+from tasks.filters import CustomFilter
+from django_filters.rest_framework import DjangoFilterBackend
 # Create your views here.
-
-def home(request):
-    return render(request, "tasks/index.html")
 
 
 class IsSuperUser(BasePermission):
@@ -23,17 +22,35 @@ class CreateTask(generics.CreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+        
+
+class AllTasks(generics.ListAPIView):
+    model = Task
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = CustomFilter
+    search_fields = ['title', 'status', 'description', 'assignee__username']
+    ordering_fields = ['due_date', 'priority']
+    
+    
 
 
-class ViewTask(generics.ListAPIView):
+class UserTask(generics.ListAPIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = CustomFilter
+    search_fields = ['title', 'status', 'description']
+    ordering_fields = ['due_date', 'priority']
     def get_queryset(self):
         user = self.request.user
         qs = Task.objects.all()
         if user.is_superuser:
             return qs 
         return qs.filter(assignee=user)
+
 
 class UserUpdateTask(generics.RetrieveUpdateAPIView):
     lookup_field = 'id'
@@ -48,23 +65,19 @@ class UserUpdateTask(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         qs = Task.objects.all()
+        if user.is_superuser:
+            return qs
         return qs.filter(assignee=user)
     
-    
-class DeleteTask(APIView):
-    
-    permission_classes = [IsAuthenticated,IsSuperUser]
-    def get(self, request, *args, **kwargs):
-        query_set = Task.objects.filter(status="completed")
-        serializer = TaskSerializer(query_set, many=True)
-        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        queryset = Task.objects.filter(status="completed")
-        count = queryset.count()
-        if count == 0:
-            return Response({"message": "No completed tasks found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        queryset.delete()
-        return Response({"message": f"{count} completed tasks deleted."}, status=status.HTTP_200_OK)
+class AdminUpdateTask(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    lookup_field = 'id'
+    lookup_url_kwarg = 'task_id'
+    serializer_class = UpdateAssigneeTaskSerializer
+    def get_queryset(self):
+        return Task.objects.all()
+    
+    
+    
     
