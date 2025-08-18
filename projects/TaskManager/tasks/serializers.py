@@ -19,9 +19,7 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['owner'] 
 
-    
-        
-        
+                    
 class CreateTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
@@ -30,7 +28,6 @@ class CreateTaskSerializer(serializers.ModelSerializer):
         )
         
     def validate_due_date(self, value):
-    # Ensure input is timezone-aware
         if timezone.is_naive(value):
             value = timezone.make_aware(value, timezone.get_current_timezone())
         
