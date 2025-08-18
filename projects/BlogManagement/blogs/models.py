@@ -9,8 +9,8 @@ class User(AbstractUser):
 class Post(models.Model):
     
     title = models.CharField(max_length=250)
-    content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blogs')
+    content = models.TextField(related_name='content')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
