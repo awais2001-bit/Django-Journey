@@ -32,6 +32,8 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         qs = Post.objects.all()
+        if user.is_superuser:
+            return qs
         return qs.filter(author=user)
     
 class CreateCommentView(generics.ListCreateAPIView):
@@ -46,3 +48,4 @@ class CreateCommentView(generics.ListCreateAPIView):
         post_id = self.kwargs.get('post_id')
         post = Post.objects.get(id=post_id)
         return serializer.save(author=self.request.user, post=post)
+    
