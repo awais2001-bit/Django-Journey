@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404, render
-from tasks.serializers import UserSerializer, ProjectSerializer, TaskSerializer, ActivitySerializer
+from tasks.serializers import UserSerializer, ProjectSerializer, TaskSerializer, UpdateTaskSerializer
 from tasks.models import User, Project, Task, Activity
 from rest_framework.decorators import api_view,action
 from rest_framework.response import Response 
-from django.db.models import Max
+from django.db.models import Max, Q
 from rest_framework import generics,filters, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser,BasePermission
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
@@ -61,3 +61,22 @@ class ProjectTasksView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         project = get_object_or_404(Project, id=self.kwargs['project_id'])
         serializer.save(owner=self.request.user, project=project)
+        
+
+class TaskViewSet(generics.RetrieveUpdateDestroyAPIView):
+    model = Task
+    lookup_field = 'id'
+    lookup_url_kwarg = 'task_id'
+    
+    
+    def get_queryset(self):
+        user = self.request.user
+        task_id = self.kwargs.get('task_id')
+        get_object_or_404(Task, id=task_id)
+        query_set = Task.objects.filter(Q(id=task_id) & (Q(assignee=user) | Q(owner=user))).select_related('project', 'owner', 'assignee').prefetch_related('activities')
+        return query_set
+    
+    def get_serializer_class(self):
+        if self.request.method in ['PUT','PATCH']:
+            return UpdateTaskSerializer
+        return TaskSerializer

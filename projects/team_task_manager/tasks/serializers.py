@@ -14,19 +14,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ('name','owner')
         
-        
-class TaskSerializer(serializers.ModelSerializer):
-    owner = serializers.CharField(source='owner.username',read_only=True)
-    assignee = serializers.SlugRelatedField(
-        slug_field="username",
-        queryset=User.objects.all()
-    )    
-    class Meta:
-        model = Task
-        fields = ('id','title','description','status','priority','assignee','owner','created_at')
-        
-
-
 class ActivitySerializer(serializers.ModelSerializer):
     user = serializers.CharField(source="user.username", read_only=True)
     task = serializers.CharField(source="task.title", read_only=True)
@@ -35,3 +22,24 @@ class ActivitySerializer(serializers.ModelSerializer):
         fields = [
             'task', 'user', 'action', 'timestamp'
         ]
+
+        
+        
+class TaskSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username',read_only=True)
+    assignee = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.all()
+    )    
+    activities = ActivitySerializer(many=True, read_only=True)
+    class Meta:
+        model = Task
+        fields = ('id','title','description','status','priority','assignee','owner','created_at','updated_at','activities')
+        
+
+
+
+class UpdateTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['status']
