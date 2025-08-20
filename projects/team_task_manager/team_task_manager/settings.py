@@ -143,7 +143,20 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # or AllowAny if you want open access
-    ]
+    ],
+    
+    'DEFAULT_THROTTLE_CLASSES': [
+    'rest_framework.throttling.AnonRateThrottle',
+        #'rest_framework.throttling.UserRateThrottle'
+        'tasks.throttles.BurstRateThrottle',  # Custom burst rate throttle
+        'tasks.throttles.SustainedRateThrottle',  # Custom sustained rate throttle
+        
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'burst': '10/minute',  # Custom burst rate throttle
+        'sustained': '100/hour',  # Custom sustained rate throttle
+    }
 }
 
 

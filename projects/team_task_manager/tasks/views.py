@@ -73,7 +73,7 @@ class ProjectTasksView(generics.ListCreateAPIView):
         project = get_object_or_404(Project, id=self.kwargs['project_id'])
         serializer.save(owner=self.request.user, project=project)
     
-    @method_decorator(cache_page(60*15, key_prefix="tasks_list"))
+    @method_decorator(cache_page(5, key_prefix="tasks_list"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
         
