@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render
-from tasks.serializers import UserSerializer, ProjectSerializer, TaskSerializer, UpdateTaskSerializer
+from tasks.serializers import UserSerializer, ProjectSerializer, TaskSerializer, UpdateTaskSerializer, RegisterSerializer
 from tasks.models import User, Project, Task, Activity
 from rest_framework.decorators import api_view,action
 from rest_framework.response import Response 
@@ -20,10 +20,16 @@ class IsSuperUser(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_superuser)
 
+class UserSerializer(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    model = User
+    permission_classes = [AllowAny]
+
 class ProjectViewSet(generics.ListCreateAPIView):
     serializer_class = ProjectSerializer
     model = Project
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsSuperUser,IsAuthenticated]
     
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
@@ -35,12 +41,16 @@ class ProjectViewSet(generics.ListCreateAPIView):
             return qs
         return qs.filter(owner=user)
     
+    @method_decorator(cache_page(60*15, key_prefix="tasks_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectSerializer
     model = Project
     lookup_field = 'id'
     lookup_url_kwarg = 'project_id'
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsSuperUser,IsAuthenticated]
     
     def get_queryset(self):
         user = self.request.user
@@ -51,7 +61,8 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     
 class ProjectTasksView(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
-
+    permission_classes = [IsAuthenticated]
+    
     def get_queryset(self):
         project_id = self.kwargs.get('project_id')
         get_object_or_404(Project, id=project_id)
@@ -61,13 +72,17 @@ class ProjectTasksView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         project = get_object_or_404(Project, id=self.kwargs['project_id'])
         serializer.save(owner=self.request.user, project=project)
+    
+    @method_decorator(cache_page(60*15, key_prefix="tasks_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
         
 
 class TaskViewSet(generics.RetrieveUpdateDestroyAPIView):
     model = Task
     lookup_field = 'id'
     lookup_url_kwarg = 'task_id'
-    
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         user = self.request.user
