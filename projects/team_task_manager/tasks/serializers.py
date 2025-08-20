@@ -16,12 +16,14 @@ class ProjectSerializer(serializers.ModelSerializer):
         
         
 class TaskSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
-    assignee = UserSerializer(read_only=True)
-    assignee_id = serializers.IntegerField(write_only=True)
+    owner = serializers.CharField(source='owner.username',read_only=True)
+    assignee = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.all()
+    )    
     class Meta:
         model = Task
-        fields = ('id','title','description','status','priority','owner','assignee','created_at')
+        fields = ('id','title','description','status','priority','assignee','owner','created_at')
         
 
 
