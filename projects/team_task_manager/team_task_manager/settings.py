@@ -37,12 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tasks',
     'rest_framework',
     'django_extensions',
     'silk',
     'drf_spectacular',  # For API documentation
     'django_filters',
+    'tasks.apps.TasksConfig',
 ]
 
 MIDDLEWARE = [

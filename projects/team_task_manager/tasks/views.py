@@ -41,7 +41,7 @@ class ProjectViewSet(generics.ListCreateAPIView):
             return qs
         return qs.filter(owner=user)
     
-    @method_decorator(cache_page(60*15, key_prefix="tasks_list"))
+    @method_decorator(cache_page(15, key_prefix="projects_list"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     
