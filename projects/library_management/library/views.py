@@ -76,7 +76,6 @@ class BookViewSet(viewsets.ModelViewSet):
 class BorrowViewSet(viewsets.ModelViewSet):
     queryset = BorrowRecord.objects.all().select_related('user', 'book')
     serializer_class = BorrowRecordSerializer
-    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=['get'])
     def mine(self, request):
@@ -84,4 +83,20 @@ class BorrowViewSet(viewsets.ModelViewSet):
         serializer = BorrowRecordSerializer(queryset, many=True)
         return Response(serializer.data)
     
+    
+    
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = [IsAdminUser]
+    serializer_class = UserSerializer
+    
+    
+    @action(detail=True, methods=['get'])
+    def borrowed_books(self, request, pk=None):
+        user = self.get_object()   
+        records = BorrowRecord.objects.filter(user=user)
+        serializer = BorrowRecordSerializer(records, many=True)
+        return Response(serializer.data)
+    
+        
     

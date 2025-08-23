@@ -25,3 +25,15 @@ def borrow_record_saved(sender,instance,created,**kwargs):
 @receiver(post_delete, sender=BorrowRecord)
 def borrow_record_deleted(sender,instance,created,**kwargs):
         print('Borrow records deleted successfully!!')     
+        
+        
+@receiver(post_save, sender=User)
+def user_saved(sender,instance,created,**kwargs):
+    if created:
+        print('User added successfully!!')
+    else:
+        print("User updated successfully!!")
+    
+@receiver(post_delete, sender=User)
+def user_deleted(sender,instance,created,**kwargs):
+    print('User deleted successfully!!')
