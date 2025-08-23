@@ -1,0 +1,100 @@
+Great question 👍 This is **core DRF (Django Rest Framework)** stuff. Let me break it down simply with differences, pros/cons, and when to use each.
+
+---
+
+## 🔹 **APIView**
+
+* Base class in DRF (like Django’s `View`, but API-friendly).
+* You **manually define methods** (`get`, `post`, `put`, `delete`, etc.).
+* You have **full control** over request/response handling.
+* Lightweight and flexible, but more boilerplate code.
+
+👉 Example:
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class HelloWorldAPIView(APIView):
+    def get(self, request):
+        return Response({"message": "Hello, World!"})
+
+    def post(self, request):
+        data = request.data
+        return Response({"received": data}, status=status.HTTP_201_CREATED)
+```
+
+✅ Use when:
+
+* You need **full custom logic**.
+* Not a typical CRUD pattern.
+* Endpoints like `login/`, `logout/`, `search/`, `custom-report/`.
+
+---
+
+## 🔹 **ModelViewSet**
+
+* A higher-level abstraction.
+* Provides **all CRUD operations automatically** (`list`, `retrieve`, `create`, `update`, `partial_update`, `destroy`) if you give it a `queryset` and `serializer`.
+* Works best with **routers** (generates URLs automatically).
+* Less boilerplate, more productivity.
+
+👉 Example:
+
+```python
+from rest_framework import viewsets
+from .models import Task
+from .serializers import TaskSerializer
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+```
+
+And in `urls.py`:
+
+```python
+from rest_framework.routers import DefaultRouter
+from .views import TaskViewSet
+
+router = DefaultRouter()
+router.register(r'tasks', TaskViewSet, basename='task')
+urlpatterns = router.urls
+```
+
+✅ Auto-generated routes:
+
+* `GET /tasks/` → list tasks
+* `POST /tasks/` → create task
+* `GET /tasks/{id}/` → retrieve task
+* `PUT/PATCH /tasks/{id}/` → update task
+* `DELETE /tasks/{id}/` → delete task
+
+✅ Use when:
+
+* You want a **standard CRUD API**.
+* Your model fits into REST pattern.
+* You want less code, faster development.
+
+---
+
+## 🔑 Main Differences
+
+| Feature              | APIView                    | ModelViewSet                     |
+| -------------------- | -------------------------- | -------------------------------- |
+| Boilerplate          | More (manual methods)      | Less (CRUD auto)                 |
+| Flexibility          | High (write anything)      | Lower (but can override methods) |
+| Best For             | Custom, non-CRUD endpoints | Standard CRUD APIs               |
+| URL Handling         | Manual in `urls.py`        | Auto via `router`                |
+| Speed of Development | Slower                     | Faster                           |
+
+---
+
+⚡ **In practice**:
+
+* For your **Task API** (CRUD style), `ModelViewSet` is better.
+* For **custom actions** like “delete all completed tasks” or “assign task to user”, `APIView` or `@action` inside a ViewSet is better.
+
+---
+
