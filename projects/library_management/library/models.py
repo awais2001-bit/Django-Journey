@@ -16,7 +16,7 @@ class Books(models.Model):
     
 class BorrowRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Books, on_delete=models.CASCADE)
+    book = models.ForeignKey(Books, on_delete=models.CASCADE,related_name="borrow_records")
     borrowed_at = models.DateTimeField(auto_now_add=True)
     returned_at = models.DateTimeField(null=True, blank=True)
     
