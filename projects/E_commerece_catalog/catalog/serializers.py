@@ -18,10 +18,11 @@ class CategorySerializer(serializers.ModelSerializer):
         
         
 class ProductDetailSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    category = CategorySerializer(read_only=True)
     class Meta:
         model = Product
         fields = ("id", "name", "sku", "price", "description", "category", "inventory_count")
+    
         
 
 class CartItemSerializer(serializers.ModelSerializer):
