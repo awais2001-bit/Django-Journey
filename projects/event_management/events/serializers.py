@@ -13,6 +13,11 @@ class EventSerializer(serializers.ModelSerializer):
         model = Events
         fields = ('id', 'title', 'location', 'start_time', 'end_time', 'created_by')
         
+    def validate(self, data):
+        if data['start_time'] > data['end_time']:
+            raise serializers.ValidationError("Start time must be before end time.")
+        return data
+        
         
 class EventAttendeeSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", read_only=True)

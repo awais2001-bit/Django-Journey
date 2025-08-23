@@ -16,9 +16,6 @@ class Events(models.Model):
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    def clean(self):
-        if self.start_time > self.end_time:
-            raise ValidationError('Start time must be before end time')
         
 class EventAttendee(models.Model):
     event = models.ForeignKey(Events,on_delete=models.CASCADE, related_name='events')
