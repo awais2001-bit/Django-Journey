@@ -21,7 +21,7 @@ class UserView(generics.CreateAPIView):
 
 class CompanyViewSet(generics.CreateAPIView):
     serializer_class = CompanySerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser,IsAuthenticated]
     model = Company
     def perform_create(self,serializer):
         serializer.save(created_by=self.request.user)
@@ -36,12 +36,12 @@ class JobViewSet(viewsets.ModelViewSet):
     pagination_class.page_query_param = 'pagesize'
     filterset_fields = ['location','company']
     
-    
+    permission_classes = [IsAuthenticated]
     
     
     def get_serializer_class(self):
-        #if self.action == 'retrieve':
-            #return JobApplicationSerializer
+        if self.action == 'retrieve' or self.action == 'apply':
+            return JobApplicationSerializer
         return  JobSerializer
     
     def perform_create(self,serializer):
@@ -51,20 +51,14 @@ class JobViewSet(viewsets.ModelViewSet):
         serializer.save()
         
         
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'],permission_classes=[IsAuthenticated])
     def apply(self,request,pk=None):
         job = self.get_object()
+        user=request.user
         
         if JobApplication.objects.filter(job=job, applicant=request.user).exists():
             return Response({'detail': 'You have already applied'}, status=400)
-        
-        
-        serializer = JobApplicationSerializer(data={
-        'job': job.id,
-        'applicant': user.id
-    })
-        serializer.is_valid(raise_exception=True)
-        serializer.save()   
-        return Response({'detail': 'Application submitted successfully'}, status=201)
 
-        
+        serializer = JobApplicationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(job=job, applicant=user)
