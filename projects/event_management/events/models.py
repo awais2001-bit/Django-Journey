@@ -10,7 +10,7 @@ class User(AbstractUser):
 class Events(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100,db_index=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
@@ -21,7 +21,7 @@ class Events(models.Model):
             raise ValidationError('Start time must be before end time')
         
 class EventAttendee(models.Model):
-    event = models.ForeignKey(Events,on_delete=models.CASCADE)
+    event = models.ForeignKey(Events,on_delete=models.CASCADE, related_name='events')
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     joined_at = models.DateTimeField(auto_now_add=True)
     
