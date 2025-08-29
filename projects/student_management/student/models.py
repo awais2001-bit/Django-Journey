@@ -31,3 +31,4 @@ class Enrollment(models.Model):
     date_enrolled = models.DateTimeField(auto_now_add=True)
     
     
+    
