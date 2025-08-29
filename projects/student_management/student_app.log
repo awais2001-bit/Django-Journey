@@ -56,3 +56,19 @@ AttributeError: 'dict' object has no attribute 'model'
 Watching for file changes with StatReloader
 /Users/awais/Documents/Django/projects/student_management/student/serializers.py changed, reloading.
 Watching for file changes with StatReloader
+Unauthorized: /student/
+Unauthorized: /student/
+Unauthorized: /student/
+✅ Student with roll no f20b1 created successfully.
+✅ Student with roll no f20b1 created successfully.
+✅ Student with roll no f20b1 created successfully.
+✅ Student with roll no f20b1 created successfully.
+✅ Teacher Ali created successfully.
+✅ Student with roll no 123 created successfully.
+✅ Student with roll no f20b1 created successfully.
+✅ Teacher Ali created successfully.
+✅ Student with roll no 123 created successfully.
+✅ Student with roll no f20b1 created successfully.
+✅ Teacher Ali created successfully.
+✅ Student with roll no 123 created successfully.
+✅ Student with roll no f20b1 created successfully.
