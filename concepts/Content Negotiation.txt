@@ -1,0 +1,118 @@
+Perfect, now you’re moving into the **other side of the pipeline**:
+if **parsers** decide *how to read the request*, then **renderers & content negotiation** decide *how to send the response back* 🚀
+
+Let’s break it down.
+
+---
+
+## 1. What is Content Negotiation?
+
+When a client (like Postman, a browser, or another API) makes a request, it usually includes an `Accept` header that tells the server what kind of response format it prefers.
+
+Example headers a client might send:
+
+* `Accept: application/json` → "Give me JSON"
+* `Accept: text/html` → "Give me HTML"
+* `Accept: application/xml` → "Give me XML"
+
+**Content negotiation** = The process where DRF looks at:
+
+1. The client’s `Accept` header
+2. The view’s `renderer_classes`
+3. The global defaults (`DEFAULT_RENDERER_CLASSES` in settings)
+
+… and decides **which renderer to use**.
+
+---
+
+## 2. Renderers in DRF
+
+Renderers are the opposite of parsers. They take your Python data (e.g. dictionaries, querysets) and convert it into a response format (e.g. JSON, HTML, etc.).
+
+Common renderers:
+
+* `JSONRenderer`
+* `BrowsableAPIRenderer` (the web UI you see in DRF)
+* `TemplateHTMLRenderer`
+* `AdminRenderer`
+
+---
+
+## 3. The `.accepted_renderer` Property
+
+This is the **actual renderer instance** chosen during content negotiation for the current request.
+
+* If the client requested JSON (`Accept: application/json`), then `.accepted_renderer` will be an instance of `JSONRenderer`.
+* If the client requested HTML (`Accept: text/html`) and you support it, then it might be `BrowsableAPIRenderer`.
+
+---
+
+## 4. The `.accepted_media_type` Property
+
+This is just the **MIME type string** chosen after negotiation.
+Examples:
+
+* `"application/json"`
+* `"text/html"`
+* `"application/xml"`
+
+---
+
+## 5. Why is this useful?
+
+Normally, DRF handles all of this for you — you just return `Response(data)` and it figures out whether to output JSON, HTML, or XML.
+
+But sometimes you want custom behavior. For example:
+
+```python
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+class CustomView(APIView):
+    def get(self, request):
+        data = {"message": "Hello Awais!"}
+
+        if request.accepted_media_type == "text/html":
+            # Return HTML manually
+            return Response("<h1>Hello Awais!</h1>")
+        
+        # Otherwise return JSON
+        return Response(data)
+```
+
+---
+
+## 6. Example Walkthrough
+
+1. Client sends:
+
+   ```
+   GET /hello
+   Accept: application/json
+   ```
+
+   * `.accepted_renderer` → `JSONRenderer`
+   * `.accepted_media_type` → `"application/json"`
+   * Response → `{"message": "Hello Awais!"}`
+
+2. Client sends:
+
+   ```
+   GET /hello
+   Accept: text/html
+   ```
+
+   * `.accepted_renderer` → `BrowsableAPIRenderer`
+   * `.accepted_media_type` → `"text/html"`
+   * Response → `<h1>Hello Awais!</h1>`
+
+---
+
+✅ **In short:**
+
+* `.accepted_renderer` → *which class will render the response*
+* `.accepted_media_type` → *what format the client and server agreed on (JSON, HTML, etc.)*
+
+---
+
+Do you want me to also compare this directly with **parsers** (so you can see the request side vs response side as a flow)?
