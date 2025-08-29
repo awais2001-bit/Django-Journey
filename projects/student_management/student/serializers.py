@@ -7,19 +7,60 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = ('name','email','roll_number')
         
+        
+        
+        
+        
+        
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = ('name','subject','email')
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 class CourseSerializer(serializers.ModelSerializer):
-    teacher = serializers.CharField(write_only=True)
+    teacher_email = serializers.EmailField(write_only=True)
     teacher_details = TeacherSerializer(source='teacher', read_only=True)
     class Meta:
         model = Course
-        fields = ('title','description','teacher','teacher_details')
+        fields = ('title','description','teacher_email','teacher_details')
         
+    
+    def validate_teacher_email(self, value):
+        try:
+            teacher = Teacher.objects.get(email=value)
+        except Teacher.DoesNotExist:
+            raise serializers.ValidationError(f"Teacher with email '{value}' does not exist.")
+        self.context['teacher'] = teacher 
+        return value
+    
+    def validate(self,attrs):
+        title = attrs.get('title')
+        teacher = self.context.get('teacher')
         
+        if teacher.subject.lower() not in title.lower():
+            raise serializers.ValidationError(f'The course title {title} does not align with the teacher subject {teacher.subject}')
+        
+        return attrs
+    
+    def create(self,validated_data):
+        teacher = Teacher.objects.get(email=validated_data.pop('teacher_email'))
+        validated_data['teacher'] = teacher
+        return super().create(validated_data)
+    
+    
+    
+    
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     student_roll_number = serializers.CharField(write_only=True)
