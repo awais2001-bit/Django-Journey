@@ -144,3 +144,11 @@ class OrderSerializer(serializers.ModelSerializer):
             item.menu_item.price * item.quantity
             for item in obj.order_items.all()
         )
+        
+        
+        
+class OrderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["status"]  # ✅ only allow updating status
+

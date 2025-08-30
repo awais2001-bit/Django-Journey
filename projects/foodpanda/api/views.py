@@ -1,5 +1,5 @@
 from api.models import User,Restaurant,MenuItem,Order,OrderItem
-from api.serializers import UserSerializer,OrderItemSerializer,OrderSerializer,MenuItemSerializer,RestaurantSerializer
+from api.serializers import UserSerializer,OrderStatusSerializer,OrderSerializer,MenuItemSerializer,RestaurantSerializer
 from rest_framework import viewsets,filters,generics
 from rest_framework.permissions import AllowAny,IsAdminUser,IsAuthenticated
 from rest_framework.response import Response
@@ -83,11 +83,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         if order.restaurant.owner != user:
             return Response({"error": "Only restaurant owner can update status"}, status=403)
 
-        status_value = request.data.get('status')
-        if status_value not in ['pending', 'accepted', 'completed', 'cancelled']:
-            return Response({"error": "Invalid status"}, status=400)
+        serializer = OrderStatusSerializer(order, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        order.status = status_value
-        order.save()
-        return Response(OrderSerializer(order).data)
+        return Response(serializer.data)
     
