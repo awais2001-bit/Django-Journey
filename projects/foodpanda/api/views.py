@@ -75,7 +75,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
 
-    @action(detail=True, methods=['patch'], url_path='status')
+    @action(detail=True, methods=['patch'], url_path='status', url_name='order-status')
     def update_status(self, request, pk=None):
         order = self.get_object()
         user = request.user
