@@ -7,7 +7,7 @@ urlpatterns = [
 
 router = DefaultRouter()
 router.register('user',views.UserView,basename='users')
-
+router.register('restaurants',views.RestaurantView,basename='restaurants')
 
 
 

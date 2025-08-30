@@ -18,3 +18,14 @@ from django.db.models import Count
 class UserView(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+    
+    
+    
+class RestaurantView(viewsets.ModelViewSet):
+    serializer_class = RestaurantSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        query_set = Restaurant.objects.select_related('owner').filter(owner=user)
+        return query_set
