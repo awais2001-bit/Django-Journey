@@ -32,3 +32,4 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         model = JobApplication
         fields = ('job','applicant','cover_letter','applied_at')
         
+        

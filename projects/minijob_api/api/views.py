@@ -23,6 +23,7 @@ class CompanyViewSet(generics.CreateAPIView):
     serializer_class = CompanySerializer
     permission_classes = [IsAdminUser,IsAuthenticated]
     model = Company
+    
     def perform_create(self,serializer):
         serializer.save(created_by=self.request.user)
         
