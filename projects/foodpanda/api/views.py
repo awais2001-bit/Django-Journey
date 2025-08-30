@@ -25,7 +25,37 @@ class RestaurantView(viewsets.ModelViewSet):
     serializer_class = RestaurantSerializer
     permission_classes = [IsAuthenticated]
     
+    def get_serializer_class(self):
+        if self.action == 'menu_items':
+            return MenuItemSerializer
+        return RestaurantSerializer
+    
     def get_queryset(self):
         user = self.request.user
         query_set = Restaurant.objects.select_related('owner').filter(owner=user)
         return query_set
+    
+    @action(detail=True, methods=['get','post','put','delete'], url_path='menu-items', url_name='restaurant-items')
+    def menu_items(self,request,pk=None):
+        restaurant = self.get_object()
+        user = self.request.user
+        
+        if request.method == 'GET':
+            items = restaurant.menu_items.all()
+            serializer = MenuItemSerializer(items, many=True)
+            return Response(serializer.data)
+        
+        else:
+            if restaurant.owner != request.user:
+                return Response(
+                    {"error": "You are not allowed to add items to this restaurant."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+                
+            serializer = MenuItemSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(restaurant=restaurant)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        

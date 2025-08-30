@@ -47,9 +47,10 @@ class RestaurantSerializer(serializers.ModelSerializer):
 #  MENU ITEM SERIALIZER
 # ---------------------------
 class MenuItemSerializer(serializers.ModelSerializer):
+    restaurant = serializers.CharField(source='restaurant.name', read_only=True)
     class Meta:
         model = MenuItem
-        fields = ('id', 'restaurant', 'name', 'price', 'available', 'stock')
+        fields = ('id','restaurant', 'name', 'price', 'available', 'stock')
 
     def validate(self, attrs):
         if attrs['price'] <= 0:
