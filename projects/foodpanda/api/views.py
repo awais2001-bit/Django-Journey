@@ -38,7 +38,6 @@ class RestaurantView(viewsets.ModelViewSet):
     @action(detail=True, methods=['get','post','put','delete'], url_path='menu-items', url_name='restaurant-items')
     def menu_items(self,request,pk=None):
         restaurant = self.get_object()
-        user = self.request.user
         
         if request.method == 'GET':
             items = restaurant.menu_items.all()
@@ -59,3 +58,36 @@ class RestaurantView(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         
+        
+    
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == "customer":
+            return Order.objects.filter(customer=user).select_related('restaurant').prefetch_related('order_items__menu_item')
+        elif user.role == "owner":
+            return Order.objects.filter(restaurant__owner=user).select_related('customer').prefetch_related('order_items__menu_item')
+        return Order.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(customer=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='status')
+    def update_status(self, request, pk=None):
+        order = self.get_object()
+        user = request.user
+
+        if order.restaurant.owner != user:
+            return Response({"error": "Only restaurant owner can update status"}, status=403)
+
+        status_value = request.data.get('status')
+        if status_value not in ['pending', 'accepted', 'completed', 'cancelled']:
+            return Response({"error": "Invalid status"}, status=400)
+
+        order.status = status_value
+        order.save()
+        return Response(OrderSerializer(order).data)
+    
