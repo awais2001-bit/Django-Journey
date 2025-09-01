@@ -51,7 +51,6 @@ class JobViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not own this company.")
         serializer.save()
         
-        
     @action(detail=True, methods=['post'],permission_classes=[IsAuthenticated])
     def apply(self,request,pk=None):
         job = self.get_object()
