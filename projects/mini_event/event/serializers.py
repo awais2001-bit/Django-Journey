@@ -75,6 +75,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def validate_quantity(self, value):
         if value <= 0:
             raise serializers.ValidationError("Quantity must be greater than zero.")
+        
+        
+        
 
 class OrderSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
@@ -96,7 +99,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 ticket_type.sold = F('sold') + quantity
                 ticket_type.save(update_fields=['sold'])
                 OrderItem.objects.create(order=order, **item_data)
-                return order
+        return order
     class Meta:
             model = Order
             fields = ['id', 'user', 'status', 'items', 'created_at']

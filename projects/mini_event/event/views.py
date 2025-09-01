@@ -124,7 +124,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             order.status = 'CANCELED'
             order.save(update_fields=['status'])
 
-        return Response({'message': 'Order canceled and stock released.'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Order canceled!.'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_name='mine', url_path='mine')
     def mine(self, request):
