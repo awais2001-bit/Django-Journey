@@ -87,6 +87,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         user = self.context['request'].user
+        validated_data.pop('user',None)
         order = Order.objects.create(user=user, status='PENDING', **validated_data)
             
         for item_data in items_data:
@@ -95,7 +96,6 @@ class OrderSerializer(serializers.ModelSerializer):
                 ticket_type.sold = F('sold') + quantity
                 ticket_type.save(update_fields=['sold'])
                 OrderItem.objects.create(order=order, **item_data)
-
                 return order
     class Meta:
             model = Order

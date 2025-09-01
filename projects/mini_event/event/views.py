@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from django.utils.timezone import now
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 # Create your views here.
 
@@ -35,7 +35,7 @@ class OrganizerViewSet(viewsets.ModelViewSet):
         try:
             organizer = Organizer.objects.filter(owner=request.user)
         except Organizer.DoesNotExist:
-            raise Response("You do not have an organizer profile.", status=status.HTTP_404_NOT_FOUND)
+            raise Response({'message':'You do not have an organizer profile.'}, status=status.HTTP_404_NOT_FOUND)
         
         serializer = OrganizerSerializer(organizer, many=True)
         return Response(serializer.data)
@@ -77,12 +77,17 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
+
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).select_related('user').prefetch_related('items__ticket_type__event')
+        return Order.objects.filter(user=self.request.user).select_related('user').prefetch_related('items__ticket_type__event').annotate(
+            total_quantity=Sum('items__quantity'),
+            total_capacity=Sum('items__ticket_type__capacity'),
+            total_items=Count('items')
+        )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -92,21 +97,24 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
 
         if order.user != request.user:
-            return Response({"error": "You can only pay for your own orders."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'You can only pay for your own orders.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if order.status != 'PENDING':
+            return Response({'error': 'Only pending orders can be paid.'}, status=status.HTTP_400_BAD_REQUEST)
 
         order.status = 'PAID'
         order.save(update_fields=['status'])
-        return Response({"message": "Order marked as PAID."}, status=status.HTTP_200_OK)
+        return Response({'message': 'Order marked as PAID.'}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'], url_path='cancel')
+    @action(detail=True, methods=['post'], url_name='cancel', url_path='cancel')
     def cancel(self, request, pk=None):
         order = self.get_object()
 
         if order.user != request.user:
-            return Response({"error": "You can only cancel your own orders."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'You can only cancel your own orders.'}, status=status.HTTP_403_FORBIDDEN)
 
         if order.status != 'PENDING':
-            return Response({"error": "Only pending orders can be canceled."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Only pending orders can be canceled.'}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
             for item in order.items.all():
@@ -116,7 +124,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             order.status = 'CANCELED'
             order.save(update_fields=['status'])
 
-        return Response({"message": "Order canceled and stock released."}, status=status.HTTP_200_OK)
+        return Response({'message': 'Order canceled and stock released.'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_name='mine', url_path='mine')
     def mine(self, request):
