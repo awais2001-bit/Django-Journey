@@ -33,7 +33,7 @@ class TicketType(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='ticket_types',db_index=True)
     name = models.CharField(max_length=50, choices=Type.choices, default=Type.GENERAL)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    capacity = models.PositiveIntegerField()
+    capacity = models.PositiveIntegerField(default=0)
     sold = models.PositiveIntegerField(default=0)
     
 
@@ -57,6 +57,7 @@ class OrderItem(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['order', 'ticket_type'], name='unique_order_ticket')
         ]
+    
     
     
 

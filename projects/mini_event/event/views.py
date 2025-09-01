@@ -1,5 +1,5 @@
 from event.models import User, Organizer, Event, TicketType, Order, OrderItem
-from event.serializers import UserSerializer,OrganizerSerializer, EventSerializer,TicketTypeSerializer
+from event.serializers import UserSerializer,OrganizerSerializer, EventSerializer,TicketTypeSerializer, OrderSerializer, OrderItemSerializer
 from rest_framework import viewsets,filters,generics
 from rest_framework.permissions import AllowAny,IsAdminUser,IsAuthenticated
 from rest_framework.response import Response
@@ -35,7 +35,7 @@ class OrganizerViewSet(viewsets.ModelViewSet):
         try:
             organizer = Organizer.objects.filter(owner=request.user)
         except Organizer.DoesNotExist:
-            raise NotFound("You do not have an organizer profile.")
+            raise Response("You do not have an organizer profile.", status=status.HTTP_404_NOT_FOUND)
         
         serializer = OrganizerSerializer(organizer, many=True)
         return Response(serializer.data)
@@ -77,3 +77,50 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).select_related('user').prefetch_related('items__ticket_type__event')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], url_name='pay', url_path='pay')
+    def pay(self, request, pk=None):
+        order = self.get_object()
+
+        if order.user != request.user:
+            return Response({"error": "You can only pay for your own orders."}, status=status.HTTP_403_FORBIDDEN)
+
+        order.status = 'PAID'
+        order.save(update_fields=['status'])
+        return Response({"message": "Order marked as PAID."}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='cancel')
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+
+        if order.user != request.user:
+            return Response({"error": "You can only cancel your own orders."}, status=status.HTTP_403_FORBIDDEN)
+
+        if order.status != 'PENDING':
+            return Response({"error": "Only pending orders can be canceled."}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            for item in order.items.all():
+                item.ticket_type.sold = F('sold') - item.quantity
+                item.ticket_type.save(update_fields=['sold'])
+
+            order.status = 'CANCELED'
+            order.save(update_fields=['status'])
+
+        return Response({"message": "Order canceled and stock released."}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_name='mine', url_path='mine')
+    def mine(self, request):
+        orders = self.get_queryset()
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

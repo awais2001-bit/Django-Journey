@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, Organizer, Event, TicketType, Order, OrderItem
-
+from django.db import transaction
+from django.db.models import F
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,4 +62,45 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("You do not own this event.")
         return value
     
+    
+    
+    
+class OrderItemSerializer(serializers.ModelSerializer):
+    ticket_type = serializers.CharField(source='tickettype.name')
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'ticket_type', 'quantity']
+        read_only_fields = ['id']
+    
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be greater than zero.")
+
+class OrderSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    class OrderItemSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = OrderItem
+            fields = ['ticket_type', 'quantity']
+    items = OrderItemSerializer(many=True)
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        user = self.context['request'].user
+        order = Order.objects.create(user=user, status='PENDING', **validated_data)
+            
+        for item_data in items_data:
+                ticket_type = item_data['ticket_type']
+                quantity = item_data['quantity']
+                ticket_type.sold = F('sold') + quantity
+                ticket_type.save(update_fields=['sold'])
+                OrderItem.objects.create(order=order, **item_data)
+
+                return order
+    class Meta:
+            model = Order
+            fields = ['id', 'user', 'status', 'items', 'created_at']
+            read_only_fields = ['id', 'user', 'status', 'created_at']
+    
+
     
