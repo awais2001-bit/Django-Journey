@@ -9,4 +9,5 @@ urlpatterns = [
 
 router = DefaultRouter()
 router.register(r'organizers', views.OrganizerViewSet, basename='organizers')
+router.register(r'events', views.EventViewSet, basename='events')
 urlpatterns += router.urls

@@ -22,8 +22,43 @@ class OrganizerSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Organizer
-        fields = ['name', 'bio', 'owner', 'created_at']
+        fields = ['id','name', 'bio', 'owner', 'created_at']
         read_only_fields = ['id', 'owner', 'created_at']
     
     
 
+
+class EventSerializer(serializers.ModelSerializer):
+    organizer = OrganizerSerializer(read_only=True)
+    organizer_id = serializers.PrimaryKeyRelatedField(queryset=Organizer.objects.all(), source='organizer', write_only=True)
+    class Meta:
+        model = Event
+        fields = ['id','title', 'description', 'organizer','organizer_id', 'venue_city', 'start_at', 'end_at', 'is_published', 'created_at']
+        read_only_fields = ['id', 'created_at']
+        
+    def validate_organizer(self, value):
+        request = self.context.get('request')
+        if value.owner != request.user:
+            raise serializers.ValidationError("You do not own this organizer.")
+        return value
+    
+    def validate(self, attrs):
+        if attrs['start_at'] >= attrs['end_at']:
+            raise serializers.ValidationError("Event end time must be after start time.")
+        return attrs
+    
+    
+class TicketTypeSerializer(serializers.ModelSerializer):
+    event = serializers.CharField(source='event.id')
+    class Meta:
+        model = TicketType
+        fields = ['id', 'event', 'name', 'price', 'capacity', 'sold']
+        read_only_fields = ['id', 'sold']
+        
+    def validate_event(self, value):
+        request = self.context.get('request')
+        if value.organizer.owner != request.user:
+            raise serializers.ValidationError("You do not own this event.")
+        return value
+    
+    

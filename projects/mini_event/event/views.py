@@ -1,5 +1,5 @@
 from event.models import User, Organizer, Event, TicketType, Order, OrderItem
-from event.serializers import UserSerializer,OrganizerSerializer
+from event.serializers import UserSerializer,OrganizerSerializer, EventSerializer,TicketTypeSerializer
 from rest_framework import viewsets,filters,generics
 from rest_framework.permissions import AllowAny,IsAdminUser,IsAuthenticated
 from rest_framework.response import Response
@@ -26,18 +26,54 @@ class OrganizerViewSet(viewsets.ModelViewSet):
     queryset = Organizer.objects.select_related('owner')
     permission_classes = [IsAuthenticated]
     
+    def perform_create(self,serializer):
+        serializer.save(owner=self.request.user)
+    
     
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated], url_name='mine', url_path='mine')
     def mine(self, request, pk=None):
         try:
             organizer = Organizer.objects.filter(owner=request.user)
         except Organizer.DoesNotExist:
-            raise NotFound("Organizer not found.")
+            raise NotFound("You do not have an organizer profile.")
         
-        if organizer.owner != request.user:
-            raise PermissionDenied("You do not have permission to access this organizer.")
-        
-        serializer = self.get_serializer(organizer)
+        serializer = OrganizerSerializer(organizer, many=True)
         return Response(serializer.data)
+        
     
     
+    
+class EventViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'ticket_type':
+            return TicketTypeSerializer
+        return EventSerializer
+    
+    queryset = Event.objects.select_related('organizer').all()
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['venue_city']
+    ordering_fields = ['start_at', 'end_at']
+    
+    
+    #ticket_types
+    @action(detail=True, methods=['get','post'], permission_classes=[IsAuthenticated], url_name='ticket_types', url_path='ticket_types')
+    def ticket_type(self, request, pk=None):
+        try:
+            event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            raise NotFound("Event not found.")
+        
+        if request.method == 'GET':
+            ticket_types = TicketType.objects.filter(event=event)
+            serializer = TicketTypeSerializer(ticket_types, many=True)
+            return Response(serializer.data)
+        
+        elif request.method == 'POST':
+            serializer = TicketTypeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(event=event)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
