@@ -21,6 +21,9 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     )
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +32,4 @@ urlpatterns = [
     path('api/', include('event.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-]
+] + debug_toolbar_urls() + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

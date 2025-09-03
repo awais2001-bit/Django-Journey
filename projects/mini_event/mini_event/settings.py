@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'event',
     'rest_framework',
     'drf_spectacular',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'mini_event.urls'
@@ -149,3 +151,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5,
     }
     
+    
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]

@@ -306,3 +306,4 @@ class ProductListThrottleApiView(generics.ListCreateAPIView):
             
         return super().get_permissions()
     
+    
